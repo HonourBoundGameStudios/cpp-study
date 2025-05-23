@@ -1,5 +1,6 @@
 ﻿#include "StreamFlix.h"
 
+#include <fstream>
 #include <iostream>
 #include <mutex>
 #include <regex>
@@ -54,12 +55,38 @@ void StreamFlix::DisplayMoviesSortedByRating(const std::string& title, const Mov
     }
 }
 
+std::string StreamFlix::LoadAPIKeyFromJson(const char* str)
+{
+    std::ifstream file(str);
+
+    try
+    {
+        if (!file.is_open())
+        {
+            std::cerr << "Error opening file: " << str << std::endl;
+            return "";
+        }
+
+        json jsonData;
+        file >> jsonData;
+        file.close();
+        auto apiKey = jsonData.at("api_key").get<std::string>();
+        return apiKey;
+    }
+    catch (const json::exception& e)
+    {
+        std::cerr << "Error parsing JSON: " << e.what() << std::endl;
+        file.close();
+        return "";
+    }
+}
+
 void StreamFlix::Run()
 {
     MovieDatabase popularMovies;
     MovieDatabase nowPlayingMovies;
 
-    static std::string TMDB_API_KEY = "";
+    static std::string TMDB_API_KEY = LoadAPIKeyFromJson("api_key.json");
 
     TMDBServiceProvider tmdbServiceProvider(TMDB_API_KEY);
 

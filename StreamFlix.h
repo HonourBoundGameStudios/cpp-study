@@ -6,6 +6,7 @@ class StreamFlix
 {
 public:
     StreamFlix() = default;
+    static std::string LoadAPIKeyFromJson(const char* str);
     static void Run();
     static void Shutdown();
 
